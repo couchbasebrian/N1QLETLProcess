@@ -1,6 +1,9 @@
 package com.couchbase.support;
 
+import java.util.List;
+
 import com.couchbase.client.java.Bucket;
+import com.couchbase.client.java.document.json.JsonObject;
 import com.couchbase.client.java.query.N1qlQuery;
 import com.couchbase.client.java.query.N1qlQueryResult;
 import com.couchbase.client.java.query.N1qlQueryRow;
@@ -11,7 +14,7 @@ public class CBCreatePrimaryIndexTimer extends TimingClass {
 	Bucket bucket;
 	
 	public CBCreatePrimaryIndexTimer(Bucket b, String bn) {
-		bucketName = bn;
+		bucketName = b.name(); // Maybe don't need bn
 		bucket = b;
 	}
 	
@@ -20,9 +23,8 @@ public class CBCreatePrimaryIndexTimer extends TimingClass {
 
 		System.out.println("About to execute: " + query1);
 
-		N1qlQueryResult qr = bucket.query(N1qlQuery.simple(query1)); 
-		System.out.println("# RESULTS: " + qr.allRows().size());
-
+		N1qlQueryResult qr = SupportUtils.runAQuery(bucket, query1); 
+				
 		for (N1qlQueryRow row : qr.allRows()) { 
 			System.out.println(row.value().toString()); 
 		}

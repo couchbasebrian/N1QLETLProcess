@@ -5,14 +5,20 @@ public class TimingClass {
 	long      startTime, endTime;
 	boolean   exceptionOccurred;
 	Exception caughtException;
+	int       numExceptions;
 	
 	public TimingClass() {
 		startTime         = 0;
 		endTime           = 0;
 		caughtException   = null;
 		exceptionOccurred = false;
+		numExceptions     = 0;
 	}
-	
+
+	public int getNumExceptions() {
+		return numExceptions;
+	}
+
 	public void startTiming() {		startTime = System.currentTimeMillis();    }
 	public void stopTiming()  {		endTime   = System.currentTimeMillis();    }
 

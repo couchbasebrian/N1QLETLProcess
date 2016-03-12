@@ -40,8 +40,7 @@ public class CBQueryBucketTimer extends TimingClass {
 
 		System.out.println("About to execute: " + query1);
 
-		N1qlQueryResult qr = bucket.query(N1qlQuery.simple(query1)); 
-		System.out.println("# RESULTS: " + qr.allRows().size());
+		N1qlQueryResult qr = SupportUtils.runAQuery(bucket, query1); 
 
 		JsonObject   eachValue;
 		JsonObject	 innerObject;

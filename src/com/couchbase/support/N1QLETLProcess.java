@@ -1,5 +1,11 @@
 package com.couchbase.support;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
+
 // Brian Williams
 // Started:  March 10, 2016
 // A program that simulates an ETL process on a Couchbase bucket using N1QL
@@ -23,23 +29,49 @@ public class N1QLETLProcess {
 	}
 	
 	public void run() {
-
-		long t1 = System.currentTimeMillis();
+		
+	    long t1 = System.currentTimeMillis();
 		
 		System.out.println("Welcome to N1QLETLProcess");
 
-		String hostName              = "192.168.0.1";
-		int    portNumber            = 8091;
-		String sourceBucketName      = "N1QLETLProcess-src";
-		String destinationBucketName = "N1QLETLProcess-dest";
-		String userName              = "Administrator";
-		String passWord              = "password";
+		String current = null;
+		try {
+			current = new java.io.File( "." ).getCanonicalPath();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+        System.out.println("Current dir:"+current);
+        String currentDir = System.getProperty("user.dir");
+        System.out.println("Current dir using System:" +currentDir);
+        
+		File propertiesFile = new File("n1qletlprocess.properties");
+		FileInputStream fileInput = null;
+		try {
+			fileInput = new FileInputStream(propertiesFile);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		Properties propertiesObject = new Properties();
+		try {
+			propertiesObject.load(fileInput);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 		
-		int numDocs = 100;	// You may set this to any number
+		String hostName              = propertiesObject.getProperty("hostName");
+		int    portNumber            = Integer.parseInt(propertiesObject.getProperty("portNumber"));
+		String sourceBucketName      = propertiesObject.getProperty("sourceBucketName");
+		String destinationBucketName = propertiesObject.getProperty("destinationBucketName");
+		String userName              = propertiesObject.getProperty("userName");
+		String passWord              = propertiesObject.getProperty("passWord");
+		
+		int numDocs = 3;	// You may set this to any number
 		
 		// Get the version of CB
-		String couchbaseVersion = SupportUtils.getCouchbaseVersion(hostName, portNumber);
-		System.out.println("Couchbase Version: " + couchbaseVersion);
+		//String couchbaseVersion = SupportUtils.getCouchbaseVersion(hostName, portNumber);
+		//System.out.println("Couchbase Version: " + couchbaseVersion);
 		
 		// First connect to Couchbase cluster
 		CBConnectTimer connect = new CBConnectTimer(hostName);
@@ -48,7 +80,7 @@ public class N1QLETLProcess {
 		// Then Create a bucket ( TODO, see if it exists first )
 		CBCreateBucketTimer createBucket = new CBCreateBucketTimer(connect.getCluster(), sourceBucketName, userName, passWord);
 		SupportUtils.runATimingClass(createBucket);
-		
+				
 		// Open the bucket
 		CBOpenBucketTimer openBucket = new CBOpenBucketTimer(connect.getCluster(), sourceBucketName);
 		SupportUtils.runATimingClass(openBucket);
@@ -82,11 +114,15 @@ public class N1QLETLProcess {
 		// Open the destination bucket
 		CBOpenBucketTimer destinationBucket = new CBOpenBucketTimer(connect.getCluster(), destinationBucketName);
 		SupportUtils.runATimingClass(destinationBucket);
-
+		
 		// Upsert the transformed data into the destination bucket
 		CBUpsertPojoTimer upsertPojo = new CBUpsertPojoTimer(transformArray.getWorkingList(), destinationBucket.getBucket());
 		SupportUtils.runATimingClass(upsertPojo);
-		
+
+		// Create an Index on the destination bucket
+		CBCreatePrimaryIndexTimer destinationIndex = new CBCreatePrimaryIndexTimer(destinationBucket.getBucket(), destinationBucketName);
+		SupportUtils.runATimingClass(destinationIndex);
+
 		// Query the destination bucket 
 		CBQueryBucketTimer queryDestinationBucket = new CBQueryBucketTimer(destinationBucket.getBucket(), destinationBucketName);
 		SupportUtils.runATimingClass(queryDestinationBucket);
@@ -97,6 +133,8 @@ public class N1QLETLProcess {
 		// Clean up objects
 		openBucket.getBucket().close();
 		connect.getCluster().disconnect();
+		
+		TimingClassResults.getInstance().displayReport();
 		
 		long t2 = System.currentTimeMillis();
 

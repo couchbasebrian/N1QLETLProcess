@@ -4,6 +4,7 @@ import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.cluster.BucketSettings;
 import com.couchbase.client.java.cluster.ClusterManager;
 import com.couchbase.client.java.cluster.DefaultBucketSettings;
+import com.couchbase.client.java.error.BucketAlreadyExistsException;
 
 public class CBCreateBucketTimer extends TimingClass {
 
@@ -31,8 +32,19 @@ public class CBCreateBucketTimer extends TimingClass {
 		BucketSettings bs = bb.build();
 		
 		ClusterManager cm = myCluster.clusterManager(u,p);
-		cm.insertBucket(bs);
 		
+		try {
+			cm.insertBucket(bs);
+		}
+		catch (BucketAlreadyExistsException bae) {
+			System.out.println("The bucket already exists");
+		} 
+		
+		// A note on insertBucket()
+		// "Inserting a Bucket is an asynchronous operation on the server side, 
+		// so even if the response is returned there is no guarantee that the operation has finished on the server itself."
+		
+		// http://docs.couchbase.com/sdk-api/couchbase-java-client-2.2.2/com/couchbase/client/java/cluster/ClusterManager.html#insertBucket-com.couchbase.client.java.cluster.BucketSettings-
 	}
 	
 } // Create a bucket

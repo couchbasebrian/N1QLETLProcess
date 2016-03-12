@@ -22,6 +22,8 @@ public class CBUpsertPojoTimer extends TimingClass {
 		
 		Gson gson = SupportUtils.getGson();
 		
+		int i = 0;
+		
 		for (DocumentPOJO eachPojo : dataList) {
 			// Upsert using N1QL query
 			
@@ -35,12 +37,13 @@ public class CBUpsertPojoTimer extends TimingClass {
 		    
 			String pojoJsonString = gson.toJson(eachPojo);
 			
-			String query1 = "UPSERT INTO `" + bucket.name() + "` (KEY,VALUE) VALUES ( \"foo\", " + pojoJsonString + " );";
+			String documentKey = "upsertedDocument" + i++;
+			
+			String query1 = "UPSERT INTO `" + bucket.name() + "` (KEY,VALUE) VALUES ( \"" + documentKey + "\", " + pojoJsonString + " );";
 
 			System.out.println("About to upsert: " + query1);
 
-			N1qlQueryResult qr = bucket.query(N1qlQuery.simple(query1)); 
-			System.out.println("# RESULTS: " + qr.allRows().size());
+			N1qlQueryResult qr = SupportUtils.runAQuery(bucket, query1); 
 
 			for (N1qlQueryRow row : qr.allRows()) { 
 				System.out.println(row.value().toString()); 
