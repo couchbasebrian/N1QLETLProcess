@@ -3,7 +3,6 @@ package com.couchbase.support;
 import java.util.ArrayList;
 
 import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.query.N1qlQuery;
 import com.couchbase.client.java.query.N1qlQueryResult;
 import com.couchbase.client.java.query.N1qlQueryRow;
 import com.google.gson.Gson;
