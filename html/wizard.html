@@ -1,0 +1,163 @@
+<html>
+	<head>
+		<title>Welcome to the wizard</title>
+
+		<style type="text/css">
+		    .mydiv1 {
+			overflow-y:scroll;
+			height:500px;
+			width:500px;
+			border:solid black 1px;
+                        display: table-cell
+		    }
+
+header {
+    background-color:black;
+    color:white;
+    text-align:center;
+    padding:5px;
+}
+
+footer {
+    background-color:red;
+    color:white;
+    text-align:center;
+    padding:5px;
+}
+		</style>
+
+      <script type="text/javascript">
+         <!--
+            function buttonClicked() {
+		outputPane = document.getElementById('outputDiv');
+		inputStringOrig = document.getElementById('inputDiv').innerHTML;
+
+		newOutput = "";
+
+		initialSplit = inputStringOrig.split(";");
+		inputString = initialSplit[0];
+
+		splitResult = inputString.split(" ");
+		numItems = splitResult.length;
+
+		var keywords = [ "SELECT", "WHERE", "FROM" ];
+                var assocArrayObj = { } ;
+
+		console.log("About to loop");
+
+		var foundSelect = false;
+		var foundFrom = false;
+		var foundWhere = false;
+	
+		var selectPart = "";
+		var fromPart = "";
+		var wherePart = "";
+
+		for (var i = 0; i < numItems; i++)
+		{
+			eachToken = splitResult[i];
+			upperCaseToken =  eachToken.toUpperCase()
+
+			// outputPane.innerHTML += 'working on ' + eachToken + '<br>'
+
+			var matchesAny = false;
+			for (var eachkw = 0; eachkw < keywords.length; eachkw++) {
+				eachKeyword = keywords[eachkw];
+				if (eachKeyword == upperCaseToken) {
+					matchesAny = true;
+				        console.log("match:" + eachToken + " " + eachKeyword);
+					// newOutput += 'Match: ' + upperCaseToken + '<br>'
+					oldValue = 0;
+
+					if (upperCaseToken == "SELECT") { foundSelect = true };
+					if (upperCaseToken == "FROM")   { foundFrom = true   };
+					if (upperCaseToken == "WHERE")  { foundWhere = true  };
+
+					if (upperCaseToken in assocArrayObj) {
+						oldValue = assocArrayObj[upperCaseToken];
+						console.log("yes it contains " + upperCaseToken);
+						assocArrayObj[upperCaseToken] = (oldValue + 1);
+
+					}
+					else {
+						console.log("no it does not contain " + upperCaseToken);
+						assocArrayObj[upperCaseToken] = 1
+					}
+					console.log("The value is now " + assocArrayObj[upperCaseToken]);
+				}
+				else {
+				    console.log("No match:" + eachToken + " " + eachKeyword);
+				}
+
+			} // for each keyword
+
+			// Things to do if NONE of the keywords matched
+
+			if (!matchesAny) {
+			if (foundSelect && !foundFrom) {
+				selectPart += eachToken;
+			}
+			else {
+				if (foundFrom && !foundWhere) {
+					fromPart += eachToken;
+				}
+				else {
+					if (foundWhere) {
+						wherePart += eachToken;
+					}
+					else {
+						console.log("Skipping " + eachToken);
+					}
+				}
+			} 
+			}
+
+			str = JSON.stringify(assocArrayObj, null, 4); 
+			console.log(str); 
+
+		} // for each token in the input
+
+		console.log(selectPart); 
+		console.log(fromPart); 
+		console.log(wherePart); 
+
+		newOutput += 'CREATE INDEX indexName ON ' + fromPart + '(' + selectPart + ') USING GSI;';
+
+		outputPane.innerHTML = newOutput;
+
+            } // end of buttonClicked() function
+         //-->
+      </script>
+
+
+	</head>
+
+	<body>
+		<header>
+			N1QL Covering Index wizard	
+		</header>
+
+		Welcome!  This wizard will help you with a covering index statement.
+
+                <div style="width: 100%">
+
+		<div style="display: table-row">
+
+		<div id="inputDiv" class="mydiv1" contenteditable="true">Select key from bucket where yada;</div>
+		<div id="outputDiv" class="mydiv1">This is where the output will go</div>
+
+                </div>
+
+                </div>
+
+		<br>
+
+		<form>
+			<button type="button" onclick="buttonClicked()">Parse my N1QL</button>
+		</form>
+
+		<footer>
+			by Brian Williams - June 27, 2016 
+		</footer>
+	</body>
+</html>
